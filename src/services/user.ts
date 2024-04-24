@@ -17,6 +17,8 @@ export interface getUserTokenPayload{
 }
 
 class UserService{
+
+    //For signUp
     public static async createUser(payload:createUserPayload){
         const {firstName,lastName,email,password}=payload;
         const saltRound=10;
@@ -40,7 +42,15 @@ class UserService{
             }
         });
     }
+
+    public static getUserById(id:string){
+        return prisma.user.findUnique({where:{
+            id:id
+        }})
+    }
     
+
+    //For login
     public static async getToken(payload:getUserTokenPayload){
         const {email,password}=payload;
         const user=await UserService.getUserByEmail(email)
@@ -61,6 +71,12 @@ class UserService{
         //GenerateToken
         const token=JWT.sign({id:user.id,email:user.email},secretKey)
         return token
+    }
+
+    //For private Routes:
+    public static getDecodedToken(token:string){
+        //@ts-ignore
+        return JWT.verify(token,process.env.JWT_SECRET)
     }
 }
 export default UserService;
